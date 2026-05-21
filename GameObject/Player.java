@@ -37,16 +37,16 @@ public class Player extends GameObject implements Serializable{
         width = 50;
         height = 50;
 
-        xDirection = -5;
+        xDirection = -10;
 
         try {
             if (id.equals("1")) {
                 img = ImageIO.read(new File("GameObject/Assets/player1.png"));
-                hitBallDirection = 4;
+                hitBallDirection = 10;
             }
             else if (id.equals("2")) {
                 img = ImageIO.read(new File("GameObject/Assets/player2.png"));
-                hitBallDirection = -4;
+                hitBallDirection = -10;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -101,6 +101,17 @@ public class Player extends GameObject implements Serializable{
     
     public int getHitBallDirection(){ return hitBallDirection; }
 
+
+    public void reset(int x, int y){
+        this.x = x;
+        this.y = y;
+        xDirection = -5;
+        yVelocity = 0;
+    }
+
+
+
+
     public synchronized int getX(){ return x; }
     public synchronized int getY(){ return y; }
     public synchronized void setX(int x){ 
@@ -112,5 +123,6 @@ public class Player extends GameObject implements Serializable{
 
     public int getWidth(){ return width; }
     public int getHeight(){ return height; }
+
    
 }

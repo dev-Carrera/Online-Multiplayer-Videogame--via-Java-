@@ -16,20 +16,17 @@ public class Ball extends GameObject{
 
     // Physic Variables
     private final int gravity = 1;
-    private final int bounceForce = -28;
+    private final int bounceForce = -22;
     private final int maxFallSpeed = 12;
 
-    // Player Variables
-    private Player player1;
-    private Player player2;
+
+    private boolean waitDone = true;
     
 
-    public Ball(int x, int y, Player player1, Player player2){
+    public Ball(int x, int y){
         super("Ball");
         this.x = x;
         this.y = y;
-        this.player1 = player1;
-        this.player2 = player2;
         xDirection = 4;
     }
 
@@ -46,10 +43,27 @@ public class Ball extends GameObject{
     }
 
     public void bounce(){
-        if (grounded) {
+        if (grounded && waitDone) {
             yVelocity = bounceForce;
             grounded = false;
+            timer();
         }
+    }
+
+    private void timer(){
+        waitDone = false;
+        
+        Thread timer = new Thread(() -> {
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+
+            waitDone = true;
+        });
+
+        timer.start();
     }
 
     public void setGrounded(boolean grounded){ 
@@ -65,7 +79,13 @@ public class Ball extends GameObject{
     }
 
 
-
+    public void reset(int x, int y){
+        this.x = x;
+        this.y = y;
+        xDirection = 4;
+        yVelocity = gravity;
+        grounded = false;
+    }
 
 
 
