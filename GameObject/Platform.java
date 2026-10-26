@@ -25,7 +25,7 @@ public class Platform extends GameObject{
         try {
             img = ImageIO.read(new File(asset));
         } catch (Exception e) {
-            e.printStackTrace();
+            // e.printStackTrace();
         }
     }
 

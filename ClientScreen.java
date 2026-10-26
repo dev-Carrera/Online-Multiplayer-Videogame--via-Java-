@@ -1,6 +1,8 @@
 import GameObject.*;
 import Data_Structures.*;
 
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -19,11 +21,9 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener,
     private ObjectInputStream in;
 
     // Players
-    private Player p11;
-    private Player p12;
+    private Player p1;
     public String playerID = "";
-    private Player p21;
-    private Player p22;
+    private Player p2;
 
     private PlayerAnimation playerAnimation1;
     private Thread player1Thread;
@@ -65,15 +65,12 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener,
 
     public ClientScreen() {
 
-        p11 = new Player(200, 255, "1");
-        p12 = new Player(200, 255, "1");
+        p1 = new Player(200, 255, "1");
+        p2 = new Player(590, 258, "2");
+        ball = new Ball(355, 185);
 
-        p21 = new Player(590, 255, "2");
-        p22 = new Player(200, 255, "2");
-        ball = new Ball(361, 185);
-
-        playerAnimation1 = new PlayerAnimation(this, p11, ball);
-        playerAnimation2 = new PlayerAnimation(this, p21, ball);
+        playerAnimation1 = new PlayerAnimation(this, p1, ball);
+        playerAnimation2 = new PlayerAnimation(this, p2, ball);
 
         player1Thread = new Thread(playerAnimation1);
         player2Thread = new Thread(playerAnimation2);
@@ -96,7 +93,8 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener,
         gameStarted = false;
 
         startGameButton = new JButton("Start Game");
-        startGameButton.setBounds(300, 300, 100, 30);
+        startGameButton.setFont(new Font("Arial", Font.BOLD, 22));
+        startGameButton.setBounds(285, 320, 280, 60);
         startGameButton.setFocusable(false);
         startGameButton.addActionListener(this);
         this.add(startGameButton);
@@ -112,17 +110,44 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener,
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        g.drawString(playerID, 10, 10);
-        g.drawString(player1Score + "  :  " + player2Score, 285, 20);
+        if(player1Score >= 15){
+            g.setFont(new Font("Arial", Font.BOLD, 36));
+            g.drawString("Player 1 Wins", 285, 200);
+            playerAnimation1.stopThread();
+            playerAnimation2.stopThread();
+            ballAnimation.stopThread();
+        }
+        if (player2Score >= 15) {
+            g.setFont(new Font("Arial", Font.BOLD, 36));
+            g.drawString("Player 2 Wins", 285, 200);
+            playerAnimation1.stopThread();
+            playerAnimation2.stopThread();
+            ballAnimation.stopThread();
+        }
 
-        platform0.drawMe(g);
-        platform1.drawMe(g);
-        platform2.drawMe(g);
-        platform3.drawMe(g);
+        if (gameStarted && (player1Score < 15 && player2Score < 15) ) {
+            g.drawString(playerID, 10, 10);
+            g.drawString("First to 25 Wins", 30, 20);
+            g.drawString(player1Score + "  :  " + player2Score, 285, 20);
 
-        p11.drawMe(g);
-        p21.drawMe(g);
-        ball.drawMe(g);
+
+            platform0.drawMe(g);
+            platform1.drawMe(g);
+            platform2.drawMe(g);
+            platform3.drawMe(g);
+
+            p1.drawMe(g);
+            p2.drawMe(g);
+            ball.drawMe(g);
+        }
+        if(!gameStarted && player1Score == 0 && player2Score == 0){
+            g.setFont(new Font("Arial", Font.BOLD, 36));
+            FontMetrics metrics = g.getFontMetrics();
+            String title = "Random Volleyball";
+            int x = (WIDTH - metrics.stringWidth(title)) / 2;
+
+            g.drawString(title, x, 120);
+        }
     }
 
     @Override
@@ -152,13 +177,19 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener,
     public void keyPressed(KeyEvent e) {
         if (startGameQueue1 && startGameQueue2 || gameStarted) {
             String message = null;
+
+            if (e.getKeyCode() == KeyEvent.VK_O) {
+                player1Score = 15;
+                repaint();
+                message = "score:15,0";
+            }
             if (e.getKeyCode() == 87) {
                 if (playerID.equals("1")) {
-                    p11.jump();
+                    p1.jump();
                     message = "1:jump";
                 }
                 if (playerID.equals("2")) {
-                    p21.jump();
+                    p2.jump();
                     message = "2:jump";
                 }
             }
@@ -180,7 +211,7 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener,
     public void keyTyped(KeyEvent e) {}
     public void mouseClicked(MouseEvent e) {}
     public void mousePressed(MouseEvent e) {
-        System.out.println("x: " + e.getX() + " | y: " + e.getY());
+        // System.out.println("x: " + e.getX() + " | y: " + e.getY());
     }
     public void mouseReleased(MouseEvent e) {}
     public void mouseEntered(MouseEvent e) {}
@@ -192,6 +223,7 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener,
 
     public void connect() {
         String hostName = "localhost";
+        
         int portNumber = 1023;
 
         try {
@@ -202,25 +234,21 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener,
 
             System.out.println("Waiting for player id...");
             playerID = (String)in.readObject();
-            p11.setID("1");
-            p12.setID("1");
-            p21.setID("2");
-            p22.setID("2");
+            p1.setID("1");
+            p2.setID("2");
             
 
             repaint();
 
             while (true) {
                 try{
-                    System.out.println("Waiting for input...");
                     Object obj = in.readObject();
                     if(obj instanceof String){
                         String[] message = ((String)obj).split(":");
 
                         if (message[0].equals("1")) {
                             if (message[1].equals("jump")) {
-                                p11.jump();
-                                p12.jump();
+                                p1.jump();
                             }
                             if (message[1].equals("connected")) {
                                 startGameQueue1 = true;
@@ -228,8 +256,7 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener,
                         }
                         else if (message[0].equals("2")) {
                             if (message[1].equals("jump")) {
-                                p21.jump();
-                                p22.jump();
+                                p2.jump();
                             }
                             if (message[1].equals("connected")) {
                                 startGameQueue2 = true;
@@ -357,8 +384,19 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener,
         } catch (Exception e) {
             System.out.println(e);
         }
-
     }
+
+    public void playSound() {
+        try {
+            File file = new File("GameObject/Assets/hitSound.wav");
+            Clip clip = AudioSystem.getClip();
+            clip.open(AudioSystem.getAudioInputStream(file));
+            clip.start();
+        } catch (Exception exc) {
+            exc.printStackTrace(System.out);
+        }
+    }
+
 
     
 }

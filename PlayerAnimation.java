@@ -7,16 +7,20 @@ public class PlayerAnimation implements Runnable{
     private ClientScreen screen;
     private Player player;
     private Ball ball;
+    
+    private boolean runThread;
 
     public PlayerAnimation(ClientScreen screen, Player player, Ball ball){
         this.screen = screen;
         this.player = player;
         this.ball = ball;
+
+        runThread = true;
     }
 
     public void run(){
 
-        while (true) {
+        while (runThread) {
 
             if (screen.playerID.equals("1")) {
                 // Player 1 is authority: run physics then broadcast position
@@ -26,10 +30,10 @@ public class PlayerAnimation implements Runnable{
                 MyArrayList<String> platformCollisions = screen.collision(screen.platformCollisionMap, player);
 
                 if (platformCollisions.contains("left")) {
-                    player.changeDirection(5);
+                    player.changeDirection(14);
                 }
                 if (platformCollisions.contains("right")) {
-                    player.changeDirection(-5);
+                    player.changeDirection(-14);
                 }
                 if (platformCollisions.contains("bottom")) {
                     player.setGrounded(true);
@@ -42,6 +46,7 @@ public class PlayerAnimation implements Runnable{
                     ball.setGrounded(true);
                     ball.bounce();
                     ball.changeDirection(player.getHitBallDirection());
+                    screen.playSound();
                 }
 
                 // Send this player's position to server
@@ -76,6 +81,10 @@ public class PlayerAnimation implements Runnable{
                 System.out.println(ex);
             }
         }
+    }
+
+    public void stopThread(){
+        runThread = false;
     }
 
 }

@@ -37,7 +37,7 @@ public class Player extends GameObject implements Serializable{
         width = 50;
         height = 50;
 
-        xDirection = -10;
+        xDirection = -14;
 
         try {
             if (id.equals("1")) {
@@ -49,7 +49,7 @@ public class Player extends GameObject implements Serializable{
                 hitBallDirection = -10;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            // e.printStackTrace();
         }
     }
 

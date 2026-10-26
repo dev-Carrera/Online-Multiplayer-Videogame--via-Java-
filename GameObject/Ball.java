@@ -1,6 +1,10 @@
 package GameObject;
 
 import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.io.File;
+
+import javax.imageio.ImageIO;
 
 public class Ball extends GameObject{
 
@@ -19,6 +23,8 @@ public class Ball extends GameObject{
     private final int bounceForce = -22;
     private final int maxFallSpeed = 12;
 
+    private BufferedImage img;
+
 
     private boolean waitDone = true;
     
@@ -27,7 +33,13 @@ public class Ball extends GameObject{
         super("Ball");
         this.x = x;
         this.y = y;
-        xDirection = 4;
+        xDirection = -4;
+
+        try {
+            img = ImageIO.read(new File("GameObject/Assets/volleyball.png"));
+        } catch (Exception e) {
+            // e.printStackTrace();
+        }
     }
 
     public void gravity(){
@@ -91,7 +103,7 @@ public class Ball extends GameObject{
 
 
     public void drawMe(Graphics g){
-        g.drawOval(x, y, width, height);
+        g.drawImage(img, x - 5, y - 5, width + 15, height + 15, null);
     }
 
     public synchronized int getX(){ return x; }

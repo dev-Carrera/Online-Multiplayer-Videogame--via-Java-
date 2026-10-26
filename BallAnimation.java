@@ -6,14 +6,18 @@ public class BallAnimation implements Runnable{
 
     private ClientScreen screen;
     private Ball ball;
+
+    private boolean runThread;
     
     public BallAnimation(ClientScreen screen, Ball ball){
         this.screen = screen;
         this.ball = ball;
+
+        runThread = true;
     }
 
     public void run(){
-        while (true) {
+        while (runThread) {
 
             if (screen.playerID.equals("1")) {
                 // Player 1 is authority: run ball physics then broadcast
@@ -36,6 +40,7 @@ public class BallAnimation implements Runnable{
                 if (ballCollisions.contains("bottom")) {
                     ball.setGrounded(true);
                     ball.bounce();
+                    screen.playSound();
                     
 
                     // Score check — use saved Y before collision snap
@@ -83,5 +88,9 @@ public class BallAnimation implements Runnable{
 
     public void updateBall(Ball ball) {
         this.ball = ball;
+    }
+
+    public void stopThread(){
+        runThread = false;
     }
 }
